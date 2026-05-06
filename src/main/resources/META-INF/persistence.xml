@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+
+    <!-- Nome da unidade de persistência — será referenciado no código Java -->
+    <persistence-unit name="gerenciamento_curso">
+
+        <properties>
+
+            <!-- ===== DADOS DA CONEXÃO COM O BANCO ===== -->
+
+            <!-- URL de conexão com o banco MySQL -->
+            <property name="jakarta.persistence.jdbc.url"
+                      value="jdbc:mysql://localhost/prg03_gerenciamento_curso?useTimezone=true&amp;serverTimezone=UTC"/>
+
+            <!-- Usuário do banco -->
+            <property name="jakarta.persistence.jdbc.user"     value="root"/>
+
+            <!-- Senha do banco -->
+            <property name="jakarta.persistence.jdbc.password" value="12345678"/>
+
+            <!-- Driver JDBC do MySQL -->
+            <property name="jakarta.persistence.jdbc.driver"   value="com.mysql.jdbc.Driver"/>
+
+            <!-- ===== PROPRIEDADES DO HIBERNATE ===== -->
+
+            <!-- Dialeto: diz ao Hibernate que estamos usando MySQL -->
+            <property name="hibernate.dialect"
+                      value="org.hibernate.dialect.MySQLDialect"/>
+
+            <!-- Mostra o SQL gerado no console (útil para aprendizado) -->
+            <property name="hibernate.show_sql"   value="true"/>
+
+            <!-- Formata o SQL exibido de forma legível -->
+            <property name="hibernate.format_sql" value="true"/>
+
+            <!-- 
+                update = Se a tabela não existir, cria.
+                Se já existir, apenas atualiza a estrutura.
+            -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+
+        </properties>
+
+    </persistence-unit>
+
+</persistence>
