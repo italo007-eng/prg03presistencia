@@ -4,12 +4,11 @@
  */
 package br.com.ifba.curso.entity;
 // Importações das anotações JPA (Jakarta Persistence)
+import br.com.ifba.infrastructure.entity.PersistenceEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.io.Serializable;
 /**
  *
  * @author Italo
@@ -22,17 +21,11 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "cursos")
-public class Curso {
-     /**
-     * @Id             → Define este atributo como chave primária
-     * @GeneratedValue → O banco gera o valor automaticamente (auto increment)
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
+public class Curso extends PersistenceEntity implements Serializable {
+    
+    
     /**
-     * @Column → Define o nome da coluna, e que não pode ser nulo
+     * Nome do curso — não pode ser nulo
      */
     @Column(name = "nome", nullable = false)
     private String nome;
@@ -44,22 +37,12 @@ public class Curso {
     private String codigoCurso;
 
     /**
-     * Indica se o curso está ativo ou não
+     * Indica se o curso está ativo
      */
     @Column(name = "ativo")
     private boolean ativo;
 
-    // ========================
-    // MÉTODOS GETTERS E SETTERS
-    // ========================
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    // ===== GETTERS E SETTERS =====
 
     public String getNome() {
         return nome;

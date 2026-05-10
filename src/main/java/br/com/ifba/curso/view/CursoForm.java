@@ -4,9 +4,9 @@
  */
 package br.com.ifba.curso.view;
 
-import br.com.ifba.CursoSave;
+import br.com.ifba.curso.dao.CursoDao;
+import br.com.ifba.curso.dao.CursoIDao;
 import br.com.ifba.curso.entity.Curso;
-import jakarta.persistence.EntityManager;
 import javax.swing.*;
 import java.awt.*;
 /**
@@ -104,59 +104,45 @@ public class CursoForm extends JFrame{
 
         // Validação básica dos campos
         if (campoNome.getText().isEmpty() || campoCodigo.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                "Preencha todos os campos!",
-                "Atenção",
-                JOptionPane.WARNING_MESSAGE);
-            return;
+        JOptionPane.showMessageDialog(this,
+            "Preencha todos os campos!", "Atenção",
+            JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    // Usa o CursoDao em vez do EntityManager diretamente
+    CursoIDao cursoDao = new CursoDao();
+
+    try {
+        if (cursoParaEditar == null) {
+            // NOVO CURSO
+            Curso novoCurso = new Curso();
+            novoCurso.setNome(campoNome.getText());
+            novoCurso.setCodigoCurso(campoCodigo.getText());
+            novoCurso.setAtivo(checkAtivo.isSelected());
+
+            cursoDao.save(novoCurso); // DAO faz o persist
+
+        } else {
+            // EDIÇÃO
+            cursoParaEditar.setNome(campoNome.getText());
+            cursoParaEditar.setCodigoCurso(campoCodigo.getText());
+            cursoParaEditar.setAtivo(checkAtivo.isSelected());
+
+            cursoDao.update(cursoParaEditar); // DAO faz o merge
         }
 
-        EntityManager em = CursoSave.getEntityManager();
+        JOptionPane.showMessageDialog(this,
+            "Curso salvo com sucesso!", "Sucesso",
+            JOptionPane.INFORMATION_MESSAGE);
 
-        try {
-            // Inicia a transação
-            em.getTransaction().begin();
+        telaListar.carregarCursos();
+        dispose();
 
-            if (cursoParaEditar == null) {
-                // NOVO CURSO — usa persist()
-                Curso novoCurso = new Curso();
-                novoCurso.setNome(campoNome.getText());
-                novoCurso.setCodigoCurso(campoCodigo.getText());
-                novoCurso.setAtivo(checkAtivo.isSelected());
-
-                em.persist(novoCurso); // Salva no banco
-
-            } else {
-                // EDIÇÃO — usa merge()
-                cursoParaEditar.setNome(campoNome.getText());
-                cursoParaEditar.setCodigoCurso(campoCodigo.getText());
-                cursoParaEditar.setAtivo(checkAtivo.isSelected());
-
-                em.merge(cursoParaEditar); // Atualiza no banco
-            }
-
-            // Confirma a transação
-            em.getTransaction().commit();
-
-            JOptionPane.showMessageDialog(this,
-                "Curso salvo com sucesso!",
-                "Sucesso",
-                JOptionPane.INFORMATION_MESSAGE);
-
-            // Atualiza a lista na tela anterior e fecha este formulário
-            telaListar.carregarCursos();
-            dispose();
-
-        } catch (Exception ex) {
-            // Se der erro, desfaz a transação (rollback)
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-
-            JOptionPane.showMessageDialog(this,
-                "Erro ao salvar o curso: " + ex.getMessage(),
-                "Erro",
-                JOptionPane.ERROR_MESSAGE);
-        }
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this,
+            "Erro ao salvar: " + ex.getMessage(), "Erro",
+            JOptionPane.ERROR_MESSAGE);
+    }
     }
 }

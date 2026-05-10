@@ -4,6 +4,9 @@
  */
 package br.com.ifba.curso.view;
 
+import br.com.ifba.curso.dao.CursoDao;
+import br.com.ifba.curso.dao.CursoIDao;
+import br.com.ifba.curso.entity.Curso;
 import java.awt.HeadlessException;
 
 /**
@@ -147,35 +150,25 @@ private void configurarTabela() {
  * Busca todos os cursos no banco via JPQL e preenche a tabela
  */
 public void carregarCursos() {
-    jakarta.persistence.EntityManager em = br.com.ifba.CursoSave.getEntityManager();
+    CursoIDao cursoDao = new CursoDao();
 
     try {
-        // JPQL — lista todos os cursos
-        java.util.List<br.com.ifba.curso.entity.Curso> cursos = em
-            .createQuery("select c from Curso as c", br.com.ifba.curso.entity.Curso.class)
-            .getResultList();
+        java.util.List<Curso> cursos = cursoDao.findAll();
 
-        // Pega o modelo da tabela e limpa
         javax.swing.table.DefaultTableModel modelo =
             (javax.swing.table.DefaultTableModel) jTable1.getModel();
         modelo.setRowCount(0);
 
-        // Adiciona cada curso na tabela
-        for (br.com.ifba.curso.entity.Curso c : cursos) {
+        for (Curso c : cursos) {
             modelo.addRow(new Object[]{
-                c.getId(),
-                c.getNome(),
-                c.getCodigoCurso(),
+                c.getId(), c.getNome(), c.getCodigoCurso(),
                 c.isAtivo() ? "Sim" : "Não",
-                "🗑 Remover",
-                "✏ Editar"
+                "🗑 Remover", "✏ Editar"
             });
         }
-
     } catch (Exception ex) {
         javax.swing.JOptionPane.showMessageDialog(this,
-            "Erro ao carregar cursos: " + ex.getMessage(),
-            "Erro",
+            "Erro ao carregar: " + ex.getMessage(), "Erro",
             javax.swing.JOptionPane.ERROR_MESSAGE);
     }
 }
@@ -184,34 +177,25 @@ public void carregarCursos() {
  * Remove o curso do banco pelo ID com confirmação
  */
 private void removerCurso(Long id) {
-    int resposta = javax.swing.JOptionPane.showConfirmDialog(this,
+     int resposta = javax.swing.JOptionPane.showConfirmDialog(this,
         "Deseja realmente excluir este curso?",
         "Confirmar exclusão",
         javax.swing.JOptionPane.YES_NO_OPTION);
 
     if (resposta == javax.swing.JOptionPane.YES_OPTION) {
-        jakarta.persistence.EntityManager em = br.com.ifba.CursoSave.getEntityManager();
+        CursoIDao cursoDao = new CursoDao();
 
         try {
-            em.getTransaction().begin();
-
-            // Busca antes de remover (conforme o slide do professor)
-            br.com.ifba.curso.entity.Curso curso =
-                em.find(br.com.ifba.curso.entity.Curso.class, id);
-
-            em.remove(curso);
-            em.getTransaction().commit();
+            Curso curso = cursoDao.findById(id);
+            cursoDao.delete(curso);
 
             javax.swing.JOptionPane.showMessageDialog(this,
-                "Curso removido com sucesso!", "Sucesso",
+                "Curso removido!", "Sucesso",
                 javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
-            carregarCursos(); // Atualiza a tabela
+            carregarCursos();
 
         } catch (Exception ex) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
             javax.swing.JOptionPane.showMessageDialog(this,
                 "Erro ao remover: " + ex.getMessage(), "Erro",
                 javax.swing.JOptionPane.ERROR_MESSAGE);
