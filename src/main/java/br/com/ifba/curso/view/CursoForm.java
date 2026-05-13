@@ -4,6 +4,8 @@
  */
 package br.com.ifba.curso.view;
 
+import br.com.ifba.curso.controller.CursoController;
+import br.com.ifba.curso.controller.CursoIController;
 import br.com.ifba.curso.dao.CursoDao;
 import br.com.ifba.curso.dao.CursoIDao;
 import br.com.ifba.curso.entity.Curso;
@@ -102,16 +104,16 @@ public class CursoForm extends JFrame{
      */
     private void salvarCurso() {
 
-        // Validação básica dos campos
-        if (campoNome.getText().isEmpty() || campoCodigo.getText().isEmpty()) {
+        // Validação básica na View
+    if (campoNome.getText().isEmpty() || campoCodigo.getText().isEmpty()) {
         JOptionPane.showMessageDialog(this,
             "Preencha todos os campos!", "Atenção",
             JOptionPane.WARNING_MESSAGE);
         return;
     }
 
-    // Usa o CursoDao em vez do EntityManager diretamente
-    CursoIDao cursoDao = new CursoDao();
+    // View usa o Controller — não fala com o DAO diretamente
+    CursoIController cursoController = new CursoController();
 
     try {
         if (cursoParaEditar == null) {
@@ -121,7 +123,7 @@ public class CursoForm extends JFrame{
             novoCurso.setCodigoCurso(campoCodigo.getText());
             novoCurso.setAtivo(checkAtivo.isSelected());
 
-            cursoDao.save(novoCurso); // DAO faz o persist
+            cursoController.save(novoCurso);
 
         } else {
             // EDIÇÃO
@@ -129,7 +131,7 @@ public class CursoForm extends JFrame{
             cursoParaEditar.setCodigoCurso(campoCodigo.getText());
             cursoParaEditar.setAtivo(checkAtivo.isSelected());
 
-            cursoDao.update(cursoParaEditar); // DAO faz o merge
+            cursoController.update(cursoParaEditar);
         }
 
         JOptionPane.showMessageDialog(this,
@@ -140,8 +142,9 @@ public class CursoForm extends JFrame{
         dispose();
 
     } catch (Exception ex) {
+        // Exibe a mensagem de erro das regras de negócio do Service
         JOptionPane.showMessageDialog(this,
-            "Erro ao salvar: " + ex.getMessage(), "Erro",
+            ex.getMessage(), "Erro",
             JOptionPane.ERROR_MESSAGE);
     }
     }

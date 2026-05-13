@@ -4,6 +4,8 @@
  */
 package br.com.ifba.curso.view;
 
+import br.com.ifba.curso.controller.CursoController;
+import br.com.ifba.curso.controller.CursoIController;
 import br.com.ifba.curso.dao.CursoDao;
 import br.com.ifba.curso.dao.CursoIDao;
 import br.com.ifba.curso.entity.Curso;
@@ -150,16 +152,18 @@ private void configurarTabela() {
  * Busca todos os cursos no banco via JPQL e preenche a tabela
  */
 public void carregarCursos() {
-    CursoIDao cursoDao = new CursoDao();
+    // View usa Controller
+    CursoIController cursoController = new CursoController();
 
     try {
-        java.util.List<Curso> cursos = cursoDao.findAll();
+        java.util.List<br.com.ifba.curso.entity.Curso> cursos =
+            cursoController.findAll();
 
         javax.swing.table.DefaultTableModel modelo =
             (javax.swing.table.DefaultTableModel) jTable1.getModel();
         modelo.setRowCount(0);
 
-        for (Curso c : cursos) {
+        for (br.com.ifba.curso.entity.Curso c : cursos) {
             modelo.addRow(new Object[]{
                 c.getId(), c.getNome(), c.getCodigoCurso(),
                 c.isAtivo() ? "Sim" : "Não",
@@ -168,7 +172,7 @@ public void carregarCursos() {
         }
     } catch (Exception ex) {
         javax.swing.JOptionPane.showMessageDialog(this,
-            "Erro ao carregar: " + ex.getMessage(), "Erro",
+            ex.getMessage(), "Erro",
             javax.swing.JOptionPane.ERROR_MESSAGE);
     }
 }
@@ -183,11 +187,12 @@ private void removerCurso(Long id) {
         javax.swing.JOptionPane.YES_NO_OPTION);
 
     if (resposta == javax.swing.JOptionPane.YES_OPTION) {
-        CursoIDao cursoDao = new CursoDao();
+        CursoIController cursoController = new CursoController();
 
         try {
-            Curso curso = cursoDao.findById(id);
-            cursoDao.delete(curso);
+            br.com.ifba.curso.entity.Curso curso =
+                cursoController.findById(id);
+            cursoController.delete(curso);
 
             javax.swing.JOptionPane.showMessageDialog(this,
                 "Curso removido!", "Sucesso",
@@ -197,7 +202,7 @@ private void removerCurso(Long id) {
 
         } catch (Exception ex) {
             javax.swing.JOptionPane.showMessageDialog(this,
-                "Erro ao remover: " + ex.getMessage(), "Erro",
+                ex.getMessage(), "Erro",
                 javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }
