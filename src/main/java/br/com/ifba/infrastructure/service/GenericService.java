@@ -7,30 +7,27 @@ package br.com.ifba.infrastructure.service;
 import br.com.ifba.infrastructure.dao.GenericIDao;
 import br.com.ifba.infrastructure.entity.PersistenceEntity;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 /**
  *
  * @author Italo
  */
+
 /**
- * Classe genérica da camada Service.
- * Faz a ponte entre a View/Controller e o DAO.
- * Aqui ficam as regras de negócio comuns a todas as entidades.
+ * Classe genérica Service.
+ *
  * @param <Entity>
+ * @Service → Bean do Spring na camada Service.
+ * @Autowired → Spring injeta o DAO automaticamente.
+ * Não precisamos mais fazer "new CursoDao()"!
  */
+@Service
 public abstract class GenericService<Entity extends PersistenceEntity>
         implements GenericIService<Entity> {
     
-    // Referência ao DAO genérico
-    // Cada Service específico vai fornecer o seu DAO
+    @Autowired
     protected GenericIDao<Entity> dao;
-
-    /**
-     * Construtor — recebe o DAO específico da entidade
-     * @param dao
-     */
-    public GenericService(GenericIDao<Entity> dao) {
-        this.dao = dao;
-    }
 
     @Override
     public Entity save(Entity entity) {

@@ -5,10 +5,9 @@
 package br.com.ifba;
 
 import br.com.ifba.curso.view.CursoListar;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
-import javax.swing.SwingUtilities;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
 /**
  *
  * @author Italo
@@ -16,32 +15,25 @@ import javax.swing.SwingUtilities;
 
 /**
  * Classe principal do projeto.
- * Por enquanto apenas inicializa a aplicação.
- * A lógica de salvar será implementada nas próximas aulas.
+ * @SpringBootApplication → inicializa todos os Beans do Spring.
  */
+@SpringBootApplication
 public class CursoSave {
-    // Lê o persistence.xml e inicializa a conexão com o banco
-    // O nome "gerenciamento_curso" é o mesmo do persistence-unit no XML
-    private static final EntityManagerFactory entityManagerFactory =
-            Persistence.createEntityManagerFactory("gerenciamento_curso");
-
-    // Cria o EntityManager a partir da factory
-    private static final EntityManager entityManager =
-            entityManagerFactory.createEntityManager();
-
-    /**
-     * Retorna o EntityManager para ser usado nas outras classes
-     * @return 
-     */
-    public static EntityManager getEntityManager() {
-        return entityManager;
-    }
-
+    
     public static void main(String[] args) {
 
-        // Abre a tela principal da aplicação
-        SwingUtilities.invokeLater(() -> {
-            new CursoListar().setVisible(true);
+        // headless(false) → necessário para aplicações desktop com Swing
+        ConfigurableApplicationContext context =
+            new SpringApplicationBuilder(CursoSave.class)
+                .headless(false)
+                .run(args);
+
+        // Pega o Bean do CursoListar gerenciado pelo Spring
+        // Assim o @Autowired funciona corretamente!
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            CursoListar tela = context.getBean(CursoListar.class);
+            tela.setVisible(true);
         });
     }
+    
 }

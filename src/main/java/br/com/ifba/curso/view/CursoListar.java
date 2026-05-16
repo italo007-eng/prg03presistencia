@@ -4,18 +4,25 @@
  */
 package br.com.ifba.curso.view;
 
-import br.com.ifba.curso.controller.CursoController;
 import br.com.ifba.curso.controller.CursoIController;
-import br.com.ifba.curso.dao.CursoDao;
-import br.com.ifba.curso.dao.CursoIDao;
-import br.com.ifba.curso.entity.Curso;
-import java.awt.HeadlessException;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import jakarta.annotation.PostConstruct;
 /**
  *
  * @author Italo
  */
+/**
+ * Tela principal de listagem de Cursos.
+ * @Component → Bean gerenciado pelo Spring.
+ */
+@Component
 public final class CursoListar extends javax.swing.JFrame {
+    
+    // Spring injeta o Controller automaticamente — sem new CursoController()!
+    @Autowired
+    private CursoIController cursoController;
+    //private br.com.ifba.curso.controller.CursoIController cursoController;
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(CursoListar.class.getName());
 
@@ -25,9 +32,17 @@ public final class CursoListar extends javax.swing.JFrame {
     public CursoListar() {
         initComponents();
         configurarTabela();  // configura as colunas
-        carregarCursos();    // carrega dados do banco
+        
     }
 
+    /**
+ * Roda após o Spring injetar o cursoController.
+ * @PostConstruct → garante que o @Autowired já foi feito.
+ */
+@PostConstruct
+public void init() {
+    carregarCursos();
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -76,7 +91,8 @@ public final class CursoListar extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        new CursoForm(this, null).setVisible(true);
+        // Passa o cursoController injetado pelo Spring para o CursoForm
+    new CursoForm(this, null, cursoController).setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
@@ -151,10 +167,12 @@ private void configurarTabela() {
 /**
  * Busca todos os cursos no banco via JPQL e preenche a tabela
  */
+/**
+ * Busca todos os cursos no banco e preenche a tabela.
+ * Usa o Controller injetado pelo Spring — sem new CursoController()!
+ */
 public void carregarCursos() {
-    // View usa Controller
-    CursoIController cursoController = new CursoController();
-
+    
     try {
         java.util.List<br.com.ifba.curso.entity.Curso> cursos =
             cursoController.findAll();
@@ -180,15 +198,18 @@ public void carregarCursos() {
 /**
  * Remove o curso do banco pelo ID com confirmação
  */
+/**
+ * Remove o curso do banco pelo ID com confirmação.
+ * Usa o Controller injetado pelo Spring.
+ */
 private void removerCurso(Long id) {
-     int resposta = javax.swing.JOptionPane.showConfirmDialog(this,
+     
+    int resposta = javax.swing.JOptionPane.showConfirmDialog(this,
         "Deseja realmente excluir este curso?",
         "Confirmar exclusão",
         javax.swing.JOptionPane.YES_NO_OPTION);
 
     if (resposta == javax.swing.JOptionPane.YES_OPTION) {
-        CursoIController cursoController = new CursoController();
-
         try {
             br.com.ifba.curso.entity.Curso curso =
                 cursoController.findById(id);
@@ -211,22 +232,25 @@ private void removerCurso(Long id) {
 /**
  * Busca o curso e abre o formulário de edição
  */
+/**
+ * Busca o curso e abre o formulário de edição.
+ * Usa o Controller injetado pelo Spring — sem EntityManager direto!
+ */
 private void editarCurso(Long id) {
-    jakarta.persistence.EntityManager em = br.com.ifba.CursoSave.getEntityManager();
-
     try {
         br.com.ifba.curso.entity.Curso curso =
-            em.find(br.com.ifba.curso.entity.Curso.class, id);
+            cursoController.findById(id);
 
         if (curso != null) {
-            new CursoForm(this, curso).setVisible(true);
+            // Passa o cursoController para o CursoForm
+            new CursoForm(this, curso, cursoController).setVisible(true);
         } else {
             javax.swing.JOptionPane.showMessageDialog(this,
                 "Curso não encontrado!", "Atenção",
                 javax.swing.JOptionPane.WARNING_MESSAGE);
         }
 
-    } catch (HeadlessException ex) {
+    } catch (Exception ex) {
         javax.swing.JOptionPane.showMessageDialog(this,
             "Erro ao buscar curso: " + ex.getMessage(), "Erro",
             javax.swing.JOptionPane.ERROR_MESSAGE);

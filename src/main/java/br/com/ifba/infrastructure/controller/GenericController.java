@@ -7,30 +7,26 @@ package br.com.ifba.infrastructure.controller;
 import br.com.ifba.infrastructure.entity.PersistenceEntity;
 import br.com.ifba.infrastructure.service.GenericIService;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
 /**
  *
  * @author Italo
  */
 /**
- * Classe genérica da camada Controller.
- * Recebe chamadas da View e repassa para o Service.
- * Não contém regras de negócio — só faz a ponte entre View e Service.
+ * Classe genérica Controller.
+ *
  * @param <Entity>
+ * @Controller → Bean do Spring na camada Controller.
+ * @Autowired → Spring injeta o Service automaticamente.
  */
+@Controller
 public abstract class GenericController<Entity extends PersistenceEntity>
         implements GenericIController<Entity> {
     
-     // Referência ao Service genérico
+     @Autowired
     protected GenericIService<Entity> service;
-
-    /**
-     * Construtor — recebe o Service específico da entidade
-     * @param service
-     */
-    public GenericController(GenericIService<Entity> service) {
-        this.service = service;
-    }
 
     @Override
     public Entity save(Entity entity) {

@@ -4,48 +4,49 @@
  */
 package br.com.ifba.curso.view;
 
-import br.com.ifba.curso.controller.CursoController;
 import br.com.ifba.curso.controller.CursoIController;
-import br.com.ifba.curso.dao.CursoDao;
-import br.com.ifba.curso.dao.CursoIDao;
 import br.com.ifba.curso.entity.Curso;
 import javax.swing.*;
 import java.awt.*;
+
+
 /**
  *
  * @author Italo
  */
 /**
  * Tela de cadastro e edição de Curso.
- * Usada tanto para criar um novo curso quanto para editar um existente.
+ * @Component → Bean gerenciado pelo Spring.
+ * @Scope("prototype") → cria uma nova instância cada vez que for chamado.
  */
 public class CursoForm extends JFrame{
-     // Campos do formulário
+    // Recebido por parâmetro — não precisa de @Autowired
+    private CursoIController cursoController;
+
     private JTextField campoNome;
     private JTextField campoCodigo;
     private JCheckBox checkAtivo;
     private JButton btnSalvar;
     private JButton btnCancelar;
 
-    // Curso que está sendo editado (null se for novo)
     private final Curso cursoParaEditar;
-
-    // Referência para a tela de listagem (para atualizar após salvar)
     private final CursoListar telaListar;
 
     /**
-     * Construtor — recebe um curso para editar (ou null para criar novo)
+     * Construtor — recebe o controller, a tela e o curso para editar
      * @param telaListar
      * @param cursoParaEditar
+     * @param cursoController
      */
-    public CursoForm(CursoListar telaListar, Curso cursoParaEditar) {
+    public CursoForm(CursoListar telaListar, Curso cursoParaEditar,
+                     CursoIController cursoController) {
         this.telaListar = telaListar;
         this.cursoParaEditar = cursoParaEditar;
+        this.cursoController = cursoController; // recebe pronto!
 
         configurarJanela();
         inicializarComponentes();
 
-        // Se estiver editando, preenche os campos com os dados do curso
         if (cursoParaEditar != null) {
             preencherCampos();
         }
@@ -61,91 +62,66 @@ public class CursoForm extends JFrame{
     }
 
     private void inicializarComponentes() {
-
-        // Campo Nome
         add(new JLabel("Nome:"));
         campoNome = new JTextField();
         add(campoNome);
 
-        // Campo Código do Curso
         add(new JLabel("Código do Curso:"));
         campoCodigo = new JTextField();
         add(campoCodigo);
 
-        // CheckBox Ativo
         add(new JLabel("Ativo:"));
         checkAtivo = new JCheckBox();
         add(checkAtivo);
 
-        // Botão Salvar
         btnSalvar = new JButton("Salvar");
         btnSalvar.addActionListener(e -> salvarCurso());
         add(btnSalvar);
 
-        // Botão Cancelar
         btnCancelar = new JButton("Cancelar");
-        btnCancelar.addActionListener(e -> dispose()); // Fecha apenas esta janela
+        btnCancelar.addActionListener(e -> dispose());
         add(btnCancelar);
     }
 
-    /**
-     * Preenche os campos com os dados do curso sendo editado
-     */
     private void preencherCampos() {
         campoNome.setText(cursoParaEditar.getNome());
         campoCodigo.setText(cursoParaEditar.getCodigoCurso());
         checkAtivo.setSelected(cursoParaEditar.isAtivo());
     }
 
-    /**
-     * Salva ou atualiza o curso no banco de dados.
-     * Usa persist (novo) ou merge (edição).
-     * Inclui tratamento de exceções.
-     */
     private void salvarCurso() {
-
-        // Validação básica na View
-    if (campoNome.getText().isEmpty() || campoCodigo.getText().isEmpty()) {
-        JOptionPane.showMessageDialog(this,
-            "Preencha todos os campos!", "Atenção",
-            JOptionPane.WARNING_MESSAGE);
-        return;
-    }
-
-    // View usa o Controller — não fala com o DAO diretamente
-    CursoIController cursoController = new CursoController();
-
-    try {
-        if (cursoParaEditar == null) {
-            // NOVO CURSO
-            Curso novoCurso = new Curso();
-            novoCurso.setNome(campoNome.getText());
-            novoCurso.setCodigoCurso(campoCodigo.getText());
-            novoCurso.setAtivo(checkAtivo.isSelected());
-
-            cursoController.save(novoCurso);
-
-        } else {
-            // EDIÇÃO
-            cursoParaEditar.setNome(campoNome.getText());
-            cursoParaEditar.setCodigoCurso(campoCodigo.getText());
-            cursoParaEditar.setAtivo(checkAtivo.isSelected());
-
-            cursoController.update(cursoParaEditar);
+        if (campoNome.getText().isEmpty() || campoCodigo.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Preencha todos os campos!", "Atenção",
+                JOptionPane.WARNING_MESSAGE);
+            return;
         }
 
-        JOptionPane.showMessageDialog(this,
-            "Curso salvo com sucesso!", "Sucesso",
-            JOptionPane.INFORMATION_MESSAGE);
+        try {
+            if (cursoParaEditar == null) {
+                Curso novoCurso = new Curso();
+                novoCurso.setNome(campoNome.getText());
+                novoCurso.setCodigoCurso(campoCodigo.getText());
+                novoCurso.setAtivo(checkAtivo.isSelected());
+                cursoController.save(novoCurso);
+            } else {
+                cursoParaEditar.setNome(campoNome.getText());
+                cursoParaEditar.setCodigoCurso(campoCodigo.getText());
+                cursoParaEditar.setAtivo(checkAtivo.isSelected());
+                cursoController.update(cursoParaEditar);
+            }
 
-        telaListar.carregarCursos();
-        dispose();
+            JOptionPane.showMessageDialog(this,
+                "Curso salvo com sucesso!", "Sucesso",
+                JOptionPane.INFORMATION_MESSAGE);
 
-    } catch (Exception ex) {
-        // Exibe a mensagem de erro das regras de negócio do Service
-        JOptionPane.showMessageDialog(this,
-            ex.getMessage(), "Erro",
-            JOptionPane.ERROR_MESSAGE);
-    }
+            telaListar.carregarCursos();
+            dispose();
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                ex.getMessage(), "Erro",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

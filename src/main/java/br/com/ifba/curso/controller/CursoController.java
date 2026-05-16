@@ -5,25 +5,21 @@
 package br.com.ifba.curso.controller;
 
 import br.com.ifba.curso.entity.Curso;
-import br.com.ifba.curso.service.CursoIService;
-import br.com.ifba.curso.service.CursoService;
 import br.com.ifba.infrastructure.controller.GenericController;
+import org.springframework.stereotype.Controller;
 /**
  *
  * @author Italo
  */
 /**
  * Controller específico do Curso.
- * Recebe chamadas da View e repassa para o CursoService.
- * Não contém regras de negócio.
+ *
+ * @Controller → Bean do Spring na camada Controller.
  */
+@Controller
 public class CursoController extends GenericController<Curso>
         implements CursoIController {
     
-    /**
-     * Construtor — passa o CursoService para o GenericController
-     */
-    public CursoController() {
-        super(new CursoService());
-    }
+        // Métodos específicos do Curso podem ser adicionados aqui
+
 }

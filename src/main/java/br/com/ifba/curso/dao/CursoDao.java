@@ -6,6 +6,7 @@ package br.com.ifba.curso.dao;
 
 import br.com.ifba.curso.entity.Curso;
 import br.com.ifba.infrastructure.dao.GenericDao;
+import org.springframework.stereotype.Repository;
 /**
  *
  * @author Italo
@@ -13,13 +14,12 @@ import br.com.ifba.infrastructure.dao.GenericDao;
 
 /**
  * DAO específico do Curso.
- * Herda todos os métodos CRUD do GenericDao (save, update, delete, findAll, findById).
- * Não precisa reescrever nenhum método que já existe no GenericDao!
- * 
- * Só adiciona métodos específicos do Curso que não existem no GenericDao.
+ *
+ * @Repository → Bean do Spring na camada DAO.
+ * Herda todos os métodos CRUD do GenericDao.
  */
+@Repository
 public class CursoDao extends GenericDao<Curso> implements CursoIDao {
-    // Os métodos save, update, delete, findAll e findById
-    // já estão implementados no GenericDao!
-    // Adicione aqui apenas métodos específicos do Curso.
+        // Métodos específicos do Curso podem ser adicionados aqui
+
 }
